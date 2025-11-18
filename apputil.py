@@ -3,17 +3,15 @@ import numpy as np
 def update_board(board):
     """
     Perform one step of Conway's Game of Life on a binary NumPy array.
-    
+
     Rules:
     - Any live cell with 2 or 3 live neighbors survives.
     - Any dead cell with exactly 3 live neighbors becomes alive.
     - All other cells die or remain dead.
     """
-    # copy to avoid modifying original during neighbor counting
     new_board = np.zeros_like(board)
     rows, cols = board.shape
 
-    # convolution-like neighbor count
     for r in range(rows):
         for c in range(cols):
             # count live neighbors
@@ -21,7 +19,7 @@ def update_board(board):
                               max(0, c-1):min(cols, c+2)]
             live_neighbors = neighbors.sum() - board[r, c]
 
-            # apply rules
+            # apply Game of Life rules
             if board[r, c] == 1:
                 if live_neighbors in (2, 3):
                     new_board[r, c] = 1
@@ -31,7 +29,16 @@ def update_board(board):
 
     return new_board
 
+# Optional Bonus Exercise 3: recursive play
+def recursive_game_of_life():
+    """
+    Play Conway's Game of Life recursively on a random 10x10 board.
+    No input is required.
+    """
+    board = np.random.randint(2, size=(10, 10))
+    
+    def step(board):
+        new_board = update_board(board)
+        return step(new_board)  # recursive call
 
-# OPTIONAL (NOT required, but helpful) – wrapper for the UI
-def get_next_board(board):
-    return update_board(board)
+    return step(board)
