@@ -1,41 +1,37 @@
 import numpy as np
-from IPython.display import clear_output
-import time
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-
-def update_board(current_board):
-    # your code here ...
-    updated_board = current_board
-
-    return updated_board
-
-
-def show_game(game_board, n_steps=10, pause=0.5):
+def update_board(board):
     """
-    Show `n_steps` of Conway's Game of Life, given the `update_board` function.
-
-    Parameters
-    ----------
-    game_board : numpy.ndarray
-        A binary array representing the initial starting conditions for Conway's Game of Life. In this array, ` represents a "living" cell and 0 represents a "dead" cell.
-    n_steps : int, optional
-        Number of game steps to run through, by default 10
-    pause : float, optional
-        Number of seconds to wait between steps, by default 0.5
+    Perform one step of Conway's Game of Life on a binary NumPy array.
+    
+    Rules:
+    - Any live cell with 2 or 3 live neighbors survives.
+    - Any dead cell with exactly 3 live neighbors becomes alive.
+    - All other cells die or remain dead.
     """
-    for step in range(n_steps):
-        clear_output(wait=True)
+    # copy to avoid modifying original during neighbor counting
+    new_board = np.zeros_like(board)
+    rows, cols = board.shape
 
-        # update board
-        game_board = update_board(game_board)
+    # convolution-like neighbor count
+    for r in range(rows):
+        for c in range(cols):
+            # count live neighbors
+            neighbors = board[max(0, r-1):min(rows, r+2),
+                              max(0, c-1):min(cols, c+2)]
+            live_neighbors = neighbors.sum() - board[r, c]
 
-        # show board
-        sns.heatmap(game_board, cmap='plasma', cbar=False, square=True)
-        plt.title(f'Board State at Step {step + 1}')
-        plt.show()
+            # apply rules
+            if board[r, c] == 1:
+                if live_neighbors in (2, 3):
+                    new_board[r, c] = 1
+            else:
+                if live_neighbors == 3:
+                    new_board[r, c] = 1
 
-        # wait for the next step
-        if step + 1 < n_steps:
-            time.sleep(pause)
+    return new_board
+
+
+# OPTIONAL (NOT required, but helpful) – wrapper for the UI
+def get_next_board(board):
+    return update_board(board)
